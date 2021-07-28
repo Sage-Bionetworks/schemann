@@ -1,0 +1,16 @@
+Package: schemann
+Title: Synapse Annotation Schemas
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Nicole",
+           family = "Kauer",
+           role = c("aut", "cre"),
+           email = "nicole.kauer@sagebase.org")
+Description: Functionality for interacting with the Synapse JSON schema API
+    services. These services allow for registering and validating Synapse entity
+    annotations using a JSON schema.
+License: License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.0

@@ -10,6 +10,18 @@ Description: Functionality for interacting with the Synapse JSON schema API
     services. These services allow for registering and validating Synapse entity
     annotations using a JSON schema.
 License: License: MIT + file LICENSE
+Depends:
+  R (>= 3.4)
+Imports:
+  glue,
+  here,
+  jsonlite,
+  purrr,
+  reticulate
+Suggests:
+  devtools,
+  testthat
+SystemRequirements: synapseclient (>= 2.4.0) (pypi.org/project/synapseclient)
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)

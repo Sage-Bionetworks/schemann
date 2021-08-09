@@ -49,10 +49,11 @@ get_registration_status <- function(syn, token) {
       syn = syn,
       uri = glue::glue("/schema/type/create/async/get/{token}")
     )
-    ## synapser doesn't return the status codes unfortunately, so we check the
-    ## response object to determine what to do. If it contains "jobState",
+    ## Originally made with synapser, which doesn't return the status codes.
+    ## Check response object to determine what to do. If it contains "jobState",
     ## that's part of the AsynchronousJobStatus, i.e. the async job hasn't
     ## completed yet.
+    ## May be able to change this to using status codes.
     if (!"jobState" %in% names(result)) {
       processing <- FALSE
     }

@@ -29,6 +29,7 @@ create_body <- function(file, dryRun = FALSE) {
 #' @return Token object containing the async token used to monitor the job
 register_schema <- function(syn, file, dryRun = FALSE) {
   rest_post(
+    syn = syn,
     uri = "/schema/type/create/async/start",
     body = create_body(file, dryRun = dryRun)
   )
@@ -45,6 +46,7 @@ get_registration_status <- function(syn, token) {
   ## completed yet
   while (processing) {
     result <- rest_get(
+      syn = syn,
       uri = glue::glue("/schema/type/create/async/get/{token}")
     )
     ## synapser doesn't return the status codes unfortunately, so we check the

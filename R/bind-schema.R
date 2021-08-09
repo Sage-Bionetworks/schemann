@@ -11,6 +11,7 @@ bind_schema <- function(syn, entity_id, schema_id) {
   uri <- glue::glue("/entity/{entity_id}/schema/binding")
   body <- glue::glue("{{entityId: \"{entity_id}\", schema$id: \"{schema_id}\"}}")
   rest_put(
+    syn = syn,
     uri = uri,
     body = body
   )

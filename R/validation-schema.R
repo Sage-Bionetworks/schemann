@@ -13,6 +13,7 @@ get_validation_schema <- function(syn, schema_id, readable = FALSE) {
   ##TODO add a catch for entities without schema
   ## Start the job to compile the validation schema
   token <- rest_post(
+    syn = syn,
     uri = "/schema/type/validation/async/start",
     body = glue::glue("{{$id: \"{schema_id}\"}}")
   )
@@ -32,6 +33,7 @@ get_schema_status <- function(syn, token) {
   ## completed yet
   while (processing) {
     result <- rest_get(
+      syn = syn,
       uri = glue::glue("/schema/type/validation/async/get/{token}")
     )
     ## synapser doesn't return the status codes unfortunately, so we check the
@@ -55,6 +57,7 @@ get_schema_status <- function(syn, token) {
 #' @return Synapse validation results
 get_validation_results <- function(syn, entity_id) {
   rest_get(
+    syn = syn,
     uri = glue::glue("/entity/{entity_id}/schema/validation")
   )
 }

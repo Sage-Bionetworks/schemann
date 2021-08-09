@@ -1,7 +1,7 @@
 #' @title Lookup organization by name
 get_org_info <- function(syn, name) {
   uri <- glue::glue("/schema/organization?name={name}")
-  rest_get(syn, uri = uri)
+  rest_get(syn = syn, uri = uri)
 }
 
 
@@ -9,7 +9,7 @@ get_org_info <- function(syn, name) {
 #'
 get_org_acl <- function(syn, org_id) {
   uri <- glue::glue("/schema/organization/{org_id}/acl")
-  rest_get(syn, uri = uri)
+  rest_get(syn = syn, uri = uri)
 }
 
 #' @title List organization schemas
@@ -17,5 +17,5 @@ get_org_acl <- function(syn, org_id) {
 list_org_schemas <- function(syn, name) {
   uri <- "/schema/list"
   body <- glue::glue("{{organizationName: \"{name}\"}}")
-  rest_post(syn, uri = uri, body = body)
+  rest_post(syn = syn, uri = uri, body = body)
 }

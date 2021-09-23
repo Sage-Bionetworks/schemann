@@ -83,7 +83,7 @@ get_anchors_from_table <- function(syn, anchor_table, anchor_path = NA) {
   anchors <- tryCatch(
     {
       syn$tableQuery(
-        glue::glue("SELECT alias, schema, version from {anchor_table}")
+        glue::glue("SELECT alias, schema, latestVersion from {anchor_table}")
       )$asDataFrame()
     },
     error = function(e) {
@@ -100,19 +100,19 @@ get_anchors_from_table <- function(syn, anchor_table, anchor_path = NA) {
 #' @description Create the anchor string with correct formatting.
 #'
 #' @noRd
-#' @param anchors A data.frame with columns `alias`, `schema`, `version`.
+#' @param anchors A data.frame with columns `alias`, `schema`, `latestVersion`.
 #' @return A string with all anchors in yaml format.
 anchor_string <- function(anchors) {
-  if (!all(c("alias", "schema", "version") %in% names(anchors))) {
-    stop("`anchors` must have columns: alias, schema, version")
+  if (!all(c("alias", "schema", "latestVersion") %in% names(anchors))) {
+    stop("`anchors` must have columns: alias, schema, latestVersion")
   }
   all_anchors <- purrr::pmap(
-    anchors[, c("alias", "schema", "version")],
-    function(alias, schema, version) {
+    anchors[, c("alias", "schema", "latestVersion")],
+    function(alias, schema, latestVersion) {
       anchor_string_single(
         alias = alias,
         schema = schema,
-        version = version
+        version = latestVersion
       )
     }
   )

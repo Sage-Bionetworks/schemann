@@ -64,3 +64,16 @@ list_org_schemas <- function(syn, name) {
   body <- glue::glue("{{organizationName: \"{name}\"}}")
   rest_post(syn = syn, uri = uri, body = body)
 }
+
+#' @title Get Schema Versions
+#'
+#' @description Get first page of information about each version of a schema.
+#' TODO Handle extra pages
+#' @param syn Synapse client object
+#' @param org_name Name of organization
+#' @param schema_name Name of schema
+get_schema_versions <- function(syn, org_name, schema_name) {
+  uri <- "/schema/version/list"
+  body <- glue::glue("{{organizationName: \"{org_name}\",schemaName: \"{schema_name}\"}}")
+  rest_post(syn = syn, uri = uri, body = body)
+}

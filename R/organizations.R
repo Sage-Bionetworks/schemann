@@ -1,3 +1,16 @@
+#' @title Create new organization
+#'
+#' @description Create a new Synapse JSON schema services organization.
+#'
+#' @export
+#' @param syn Synapse client object
+#' @param name Name of the organization (must be unique across Synapse)
+create_org <- function(syn, name) {
+  uri <- "/schema/organization"
+  body <- glue::glue("{{\"organizationName\":\"{name}\"}}")
+  rest_post(syn, uri = uri, body = body)
+}
+
 #' @title Lookup organization by name
 #'
 #' @description Get organization information by name.
@@ -10,7 +23,6 @@ get_org_info <- function(syn, name) {
   rest_get(syn = syn, uri = uri)
 }
 
-
 #' @title Organization ACL
 #'
 #' @description Get organization's Access Control List (ACL) by organization ID
@@ -22,6 +34,21 @@ get_org_info <- function(syn, name) {
 get_org_acl <- function(syn, org_id) {
   uri <- glue::glue("/schema/organization/{org_id}/acl")
   rest_get(syn = syn, uri = uri)
+}
+
+#' @title Update organization ACL
+#'
+#' @description Update an organization's ACL. Must have appropriate ACL
+#' permissions to update.
+#'
+#' @export
+#' @param syn Synapse client object
+#' @param org_id Organization ID number
+#' @param acl JSON formmated string with new ACL
+update_org_acl <- function(syn, org_id, acl) {
+  ## TODO Make ACL bit better
+  uri <- glue::glue("/schema/organization/{org_id}/acl")
+  rest_put(syn = syn, uri = uri, body = acl)
 }
 
 #' @title List organization schemas

@@ -2,12 +2,16 @@
 % Please edit documentation in R/organizations.R
 \name{list_org_schemas}
 \alias{list_org_schemas}
-\title{List organization schemas
-TODO missing token handling for more pages}
+\title{List organization schemas}
 \usage{
 list_org_schemas(syn, name)
 }
+\arguments{
+\item{syn}{Synapse client object}
+
+\item{name}{Name of organization}
+}
 \description{
-List organization schemas
+List first page of schemas registered to an organization.
 TODO missing token handling for more pages
 }

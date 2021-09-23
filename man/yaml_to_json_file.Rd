@@ -4,16 +4,20 @@
 \alias{yaml_to_json_file}
 \title{Convert yaml to JSON schema file}
 \usage{
-yaml_to_json_file(yaml_path, json_path, name = NA)
+yaml_to_json_file(yaml_path, json_path = NA, name = NA)
 }
 \arguments{
-\item{yaml_path}{Path to the yaml file}
+\item{yaml_path}{Path to the yaml file.}
 
-\item{json_path}{JSON output file path}
+\item{json_path}{JSON output file path. If \code{NA} (default), creates temporary
+file to write to.}
 
 \item{name}{Name of the schema to return. This is needed if there are
 multiple sections of the yaml file and only a single section that has the
 schema needs to be returned.}
+}
+\value{
+\code{json_path} for the written file.
 }
 \description{
 Convert a yaml schema to JSON schema and write to file.

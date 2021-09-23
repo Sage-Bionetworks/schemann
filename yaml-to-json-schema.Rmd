@@ -1,0 +1,218 @@
+---
+title: "Generating JSON Schema From YAML"
+author: "Nicole Kauer"
+date: "8/25/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Overview
+
+Yaml has some (subjective) benefits over JSON, primarily readability. This document goes over using schemann to change a yaml schema to a JSON schema for registering in Synapse.
+
+## Yaml to JSON Formatting
+
+There are some peculiarities that come with converting yaml to JSON. Here are some important things to be aware of.
+
+### Spacing
+
+Yaml formatting requires precise spacing. One line being off by one space or having
+a tab character instead of a space will throw off the entire schema. Ensure that you are only using spaces as being exact in lining up rows that should go together.
+
+### Yaml to JSON Objects and Arrays
+
+JSON objects require curly braces ({}) around them, while JSON arrays require square brackets ([]) around them. In general, translating this to/from yaml is fairly straightforward as yaml objects and yaml arrays are equivalent.
+
+Yaml object example:
+
+```
+my-object:
+  color: blue
+  size: large
+```
+
+Yaml array example:
+
+```
+my-color-array:
+  - blue
+  - green
+  - orange
+```
+
+### Yaml to JSON logic
+
+Adding logic, such as `if-then` and `allOf` is a little more complicated in yaml, but doable if making use of yaml objects and arrays.
+
+For example, using `allOf` in a JSON schema means having an array of JSON schema objects. Knowing this, we can do the following:
+
+```
+allOf:
+  -
+    properties:
+      isModelSystem:
+        type: boolean
+    required:
+      - isModelSystem
+  -
+    properties:
+      name:
+        type: string
+        minLength: 1
+    required:
+      - name
+```
+This will make an `allOf` array with two schema objects. Within those schema objects, the properties will also be objects and the required keys will be an array.
+
+An example of an `if-then` would be:
+
+```
+if:
+  properties:
+    isPet:
+      type: boolean
+      enum:
+        - true
+  required:
+    - isPet
+then:
+  properties:
+    petName:
+      type: string
+    petType:
+      enum:
+        - cat
+        - dog
+        - rat
+  required:
+    - petName
+    - petType
+```
+
+In short, logic can be mimicked with knowledge of JSON arrays and objects and how to translate those to/from yaml.
+
+### Anchors
+
+Anchors and aliases are handy features. You can use these to 'bookmark' something and reference it again later. For example, you can define your properties with anchors and then refer to them with *anchor (i.e. the alias). When you get the yaml schema, the aliases will be dereferenced -- the rows after the anchor line will replace your alias'd name.
+
+```
+anchors:
+  petName: &petName
+    type: string
+    minLength: 1
+    maxLength: 20
+  petType: &petType
+    type: string
+    enum:
+      - cat
+      - dog
+      - rat
+
+my-schema-snippet:
+  properties:
+    petName: *petName
+    petType: *petType
+  required:
+    - petName
+    - petType
+```
+
+
+## Process
+
+### Create a Yaml Schema
+
+There are example schemas in the [yaml-schema branch of sysbioDCCjsonschemas](https://github.com/Sage-Bionetworks/sysbioDCCjsonschemas/tree/yaml-schema).
+
+### Requirements
+Install the `schemann` package. Follow the installation instructions in the README.
+
+Many of the functions in `schemann` require authentication with Synapse. You can use either a Synapse Personal Access Token (PAT) or a local .synapseConfig. In either case, be sure to capture the returned object from `schemann::login_synapse()`.
+
+```{r login, echo=FALSE, eval=FALSE}
+## Local .synapseConfig
+syn <- schemann::login_synapse()
+
+## Using a PAT
+syn <- schemann::login_synapse(authToken = "Synapse_Personal_Access_Token")
+```
+
+#### Dictionary Anchors
+
+You can create a list of anchors from a Synapse table to use for referencing registered Synapse schema. The table must have the columns:
+
+- schema: The schema ID, without the version number (e.g. `sage.annotations-experimentalData.assay`).
+- version: The version number (e.g. `0.0.1`).
+- alias: The name for the anchor that will be used in your schema (e.g. `experimentalData_assay`). Note that you cannot use `.` in the alias.
+
+
+```{r anchorString, eval=FALSE}
+## If not given an `anchor_path`, will write a temporary file 
+## and give back the path
+anchor_path <- schemann::get_anchors_from_table(
+  syn = syn,
+  anchor_table = "syn26050066",
+  anchor_path = "anchors.yml"
+)
+```
+
+The example above uses the schema table for Sage Bionetworks. It will output a file that looks similar to the example below.
+
+```
+anchors:
+  experimentalData_individualID: &experimentalData_individualID
+    $ref: sage.annotations-experimentalData.individualID-0.0.2
+  experimentalData_individualIdSource: &experimentalData_individualIdSource
+    $ref: sage.annotations-experimentalData.individualIdSource-0.0.11
+  experimentalData_species: &experimentalData_species
+    $ref: sage.annotations-experimentalData.species-0.0.2
+```
+
+Once the anchor file has been created, combine it with your yaml schema file. This will allow for dereferencing all the anchors by their alias's used in your schema.
+
+```{r fullYaml, eval=FALSE}
+## If not given an `output_path`, will write a temporary file 
+## and give back the path
+full_yaml_path <- schemann::combine_anchors_schema(
+  yaml_path = "path_to_my_yaml_schema.yml",
+  anchor_path = anchor_path,
+  output_path = "full_yaml_schema.yml"
+)
+```
+
+Synapse requires schemas to be in JSON format. Convert the combined yaml schema to JSON.
+
+```{r fullJSON, eval=FALSE}
+## If not given an `json_path`, will write a temporary file 
+## and give back the path
+full_json_path <- schemann::yaml_to_json_file(
+  yaml_path = full_yaml_path,
+  json_path = "schema.json",
+  name = "main-schema"
+)
+```
+
+You can now check if the schema will register in Synapse.
+
+```{r testRegister, eval=FALSE}
+schemann::register_and_report(
+  syn = syn,
+  file = full_json_path,
+  dryRun = TRUE
+)
+```
+
+If you receive a `TRUE` back, you can register the schema in Synapse by running the same function with dryRun = FALSE. If you receive a `FALSE` back, you will need to check the error message to determine the problem. There are a variety of reasons the schema could fail:
+
+- The format of the yaml schema is not translating to JSON correctly. Check your format matches the guidelines above.
+- You may have used a JSON schema element not supported by Synapse. Check the REST API docs for supported JSON elements.
+- The version of the schema already exists. Increment the version and try, again.
+- A version of a referenced schema does not exist in Synapse (yet). If you are using the Sage Bionetworks schema table to generate your anchors, please wait while the schemas are registered. Recently added or updated terms may take a moment to register. You can check the synapseAnnotations GitHub repository to verify if the GitHub Action for registering the terms has completed. Try again once they are registered.
+- You used an alias as a property without giving it a name (e.g. `properties: *my_alias`). This error often looks like `org.json.JSONException: JSONObject["$ref"] is not a JSONObject.` and can be fixed by nesting the alias appropriately.
+```
+properties:
+   foo: *my_alias
+```

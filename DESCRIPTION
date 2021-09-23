@@ -13,6 +13,7 @@ License: License: MIT + file LICENSE
 Depends:
   R (>= 3.4)
 Imports:
+  blogdown,
   glue,
   here,
   jsonlite,
@@ -22,6 +23,7 @@ Imports:
   ymlthis
 Suggests:
   devtools,
+  mockery,
   testthat
 SystemRequirements: synapseclient (>= 2.4.0) (pypi.org/project/synapseclient)
 Encoding: UTF-8

@@ -6,6 +6,11 @@
 \usage{
 get_org_info(syn, name)
 }
+\arguments{
+\item{syn}{Synapse client object}
+
+\item{name}{Name of organization}
+}
 \description{
-Lookup organization by name
+Get organization information by name.
 }

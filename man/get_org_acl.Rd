@@ -6,6 +6,12 @@
 \usage{
 get_org_acl(syn, org_id)
 }
+\arguments{
+\item{syn}{Synapse client object}
+
+\item{org_id}{Organziation ID number}
+}
 \description{
-Organization ACL
+Get organization's Access Control List (ACL) by organization ID
+number.
 }
